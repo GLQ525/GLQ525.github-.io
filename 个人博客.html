@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小记 · 生活与学习笔记</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%233D5A80'/%3E%3Cpath d='M10 9h12M10 14h12M10 19h8M10 24h10' stroke='%23F4F2ED' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#F4F2ED;
+    --surface:#FFFFFF;
+    --text:#22201D;
+    --text-2:#6E6A60;
+    --line:#E4E0D6;
+    --life:#4A7C59;
+    --life-bg:#EDF2EE;
+    --note:#3D5A80;
+    --note-bg:#EBF0F5;
+    --tag-bg:#EDEAE2;
+    --maxw:680px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:16px;
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+
+  /* ===== 顶部导航 ===== */
+  header{
+    position:sticky;top:0;z-index:10;
+    background:rgba(244,242,237,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    max-width:var(--maxw);margin:0 auto;
+    padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .brand{
+    font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+    font-size:20px;font-weight:600;letter-spacing:2px;
+  }
+  .brand span{color:var(--note)}
+  nav ul{display:flex;gap:24px;list-style:none}
+  nav a{
+    font-size:14px;color:var(--text-2);
+    padding:4px 2px;border-bottom:2px solid transparent;
+    transition:color .2s,border-color .2s;
+  }
+  nav a:hover{color:var(--text)}
+  nav a.active{color:var(--text);border-bottom-color:var(--note)}
+
+  main{max-width:var(--maxw);margin:0 auto;padding:40px 24px 80px}
+
+  /* ===== 视图切换 ===== */
+  .view{display:none}
+  .view.active{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ===== 首页 Hero ===== */
+  .hero{padding:48px 0 40px}
+  .hero h1{
+    font-family:"Noto Serif SC","Songti SC","SimSun",serif;
+    font-size:clamp(28px,5.5vw,44px);
+    font-weight:600;line-height:1.4;letter-spacing:1px;
+    margin-bottom:16px;
+  }
+  .hero h1 em{font-style:normal;color:var(--life)}
+  .hero p{color:var(--text-2);font-size:15px;max-width:480px}
+
+  .section-title{
+    display:flex;align-items:baseline;gap:10px;
+    margin:40px 0 18px;
+    font-size:13px;letter-spacing:2px;color:var(--text-2);
+  }
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  .section-title .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .dot.life{background:var(--life)}
+  .dot.note{background:var(--note)}
+
+  /* ===== 列表条目（生活/笔记通用） ===== */
+  .entry{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-bottom:14px;
+    cursor:pointer;
+    transition:border-color .2s,transform .2s;
+  }
+  .entry:hover{border-color:#C9C4B6}
+  .entry-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .entry h3{
+    font-family:"Noto Serif SC","Songti SC",serif;
+    font-size:18px;font-weight:600;line-height:1.5;
+  }
+  .entry .date{font-size:13px;color:var(--text-2);white-space:nowrap}
+  .entry .excerpt{
+    margin-top:8px;font-size:14px;color:var(--text-2);line-height:1.7;
+  }
+  .entry .tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+  .tag{
+    font-size:12px;padding:2px 10px;border-radius:20px;
+    background:var(--tag-bg);color:var(--text-2);
+  }
+  .tag.life{background:var(--life-bg);color:var(--life)}
+  .tag.note{background:var(--note-bg);color:var(--note)}
+  .entry .full{
+    display:none;margin-top:14px;padding-top:14px;
+    border-top:1px dashed var(--line);
+    font-size:15px;line-height:1.9;color:var(--text);
+  }
+  .entry.open .full{display:block}
+  .entry .toggle{
+    margin-top:12px;font-size:13px;color:var(--text-2);
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .entry .toggle svg{transition:transform .2s}
+  .entry.open .toggle svg{transform:rotate(180deg)}
+
+  /* ===== 生活时间线 ===== */
+  .timeline{position:relative;padding-left:24px}
+  .timeline::before{
+    content:"";position:absolute;left:5px;top:8px;bottom:8px;
+    width:1px;background:var(--line);
+  }
+  .tl-item{position:relative;margin-bottom:20px}
+  .tl-item::before{
+    content:"";position:absolute;left:-22px;top:14px;
+    width:9px;height:9px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--life);
+  }
+  .tl-date{font-size:13px;color:var(--life);font-weight:500;margin-bottom:4px}
+  .tl-card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:6px;padding:18px 20px;cursor:pointer;
+    transition:border-color .2s;
+  }
+  .tl-card:hover{border-color:#B8CCBD}
+  .tl-card h3{
+    font-family:"Noto Serif SC","Songti SC",serif;
+    font-size:17px;font-weight:600;margin-bottom:6px;
+  }
+  .tl-card p{font-size:14px;color:var(--text-2);line-height:1.7}
+  .tl-card .full{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:15px;line-height:1.9}
+  .tl-card.open .full{display:block}
+
+  /* ===== 笔记筛选 ===== */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .filters button{
+    font-size:13px;padding:5px 14px;border-radius:20px;
+    border:1px solid var(--line);background:transparent;
+    color:var(--text-2);cursor:pointer;transition:all .2s;
+    font-family:inherit;
+  }
+  .filters button:hover{border-color:var(--note);color:var(--note)}
+  .filters button.active{background:var(--note);color:#fff;border-color:var(--note)}
+
+  /* ===== 关于页 ===== */
+  .about{padding-top:24px}
+  .about .avatar{
+    width:72px;height:72px;border-radius:50%;
+    background:var(--note-bg);display:flex;align-items:center;justify-content:center;
+    font-family:"Noto Serif SC",serif;font-size:28px;color:var(--note);
+    margin-bottom:20px;
+  }
+  .about h2{
+    font-family:"Noto Serif SC",serif;font-size:24px;margin-bottom:12px;
+  }
+  .about p{color:var(--text-2);margin-bottom:14px;font-size:15px}
+  .about .meta{
+    margin-top:28px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--text-2);line-height:2;
+  }
+
+  footer{
+    text-align:center;padding:32px 24px;
+    font-size:12px;color:var(--text-2);
+    border-top:1px solid var(--line);
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width:600px){
+    main{padding:28px 18px 60px}
+    .nav{padding:14px 18px}
+    nav ul{gap:16px}
+    .entry-head{flex-direction:column;gap:4px}
+    .entry .date{white-space:normal}
+    .hero{padding:24px 0 28px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#/home" class="brand">小<span>记</span></a>
+    <nav>
+      <ul>
+        <li><a href="#/home" data-route="home">首页</a></li>
+        <li><a href="#/life" data-route="life">生活</a></li>
+        <li><a href="#/notes" data-route="notes">笔记</a></li>
+        <li><a href="#/about" data-route="about">关于</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===== 视图：首页 ===== -->
+<section id="view-home" class="view">
+  <div class="hero">
+    <h1>把日子过成<br>值得<em>记下来</em>的样子。</h1>
+    <p>这里记录生活里的细碎瞬间，也整理学习路上的思考与笔记。不定期更新。</p>
+  </div>
+
+  <div class="section-title"><span class="dot life"></span>最近生活</div>
+  <div id="home-life"></div>
+
+  <div class="section-title"><span class="dot note"></span>最近笔记</div>
+  <div id="home-notes"></div>
+</section>
+
+<!-- ===== 视图：生活 ===== -->
+<section id="view-life" class="view">
+  <div class="hero" style="padding-bottom:24px">
+    <h1 style="font-size:28px">生活</h1>
+    <p>日常的散步、做饭、读书和那些一闪而过的念头。</p>
+  </div>
+  <div class="timeline" id="life-list"></div>
+</section>
+
+<!-- ===== 视图：笔记 ===== -->
+<section id="view-notes" class="view">
+  <div class="hero" style="padding-bottom:24px">
+    <h1 style="font-size:28px">学习笔记</h1>
+    <p>编程、英语、读书与技能——学过的东西，写下来才算真正学会。</p>
+  </div>
+  <div class="filters" id="note-filters"></div>
+  <div id="note-list"></div>
+</section>
+
+<!-- ===== 视图：关于 ===== -->
+<section id="view-about" class="view">
+  <div class="about">
+    <div class="avatar">记</div>
+    <h2>你好，我是这里的主人。</h2>
+    <p>这是一个用来记录的小站。生活里值得回头看的片段，学习中想留下来的思路，都放在这里。</p>
+    <p>没有更新频率，没有阅读门槛。路过的朋友，随便看看就好。</p>
+    <div class="meta">
+      站点：小记 · 生活与学习笔记<br>
+      建立：2026 年秋<br>
+      用途：记录生活，整理学习
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>© 2026 小记 · 记录生活，也记录思考</footer>
+
+<script>
+// ===== 数据 =====
+const LIFE = [
+  {
+    date:"2026.10.28", title:"秋天的第一次骑车",
+    excerpt:"下班沿着河边骑了八公里，银杏黄了一半，风已经有凉意了。",
+    full:"下班临时起意，把电动车停在车棚，扫了辆共享单车沿河南路骑。河水比夏天清，岸两边的银杏黄了不到一半，踩在落叶上有脆脆的声音。骑到第三公里开始出汗，第六公里开始觉得累，第八公里到家时天刚好黑下来。秋天骑车真舒服，比跑步安静，比散步快。"
+  },
+  {
+    date:"2026.10.15", title:"一个人的火锅",
+    excerpt:"周末没出门，自己买了毛肚、肥牛和豆腐，一个人吃火锅也很满足。",
+    full:"周六睡到自然醒，去菜市场买了毛肚、肥牛卷、老豆腐和一把青菜。锅底用的是上周剩下的半袋火锅底料，加了番茄和姜片。一个人吃火锅的好处是不用抢，毛肚七上八下，肥牛涮到刚变色就捞。配了一杯冰可乐，窗外在下雨，锅在桌上咕嘟咕嘟，觉得这就是周末该有的样子。"
+  },
+  {
+    date:"2026.09.20", title:"整理了一次书桌",
+    excerpt:"把书架重新归类，翻出三年前买的一本还没拆封的书。",
+    full:"书桌乱了很久，周末终于下决心整理。把书架上的书按类别重新摆——编程的归一堆，文学的归一堆，翻到最里面发现一本三年前买的《写作这回事》，塑封都没拆。当时为什么买呢？已经想不起来了。不过今天拆了，读了前二十页，挺对胃口。整理书桌的副产品是：发现自己买了很多其实并不会立刻读的书。"
+  },
+  {
+    date:"2026.08.30", title:"搬家一周年",
+    excerpt:"去年这个时候搬到这个小区，楼下那家包子铺还在。",
+    full:"一年前的今天拖着两个箱子搬进这个小区。当时楼下的包子铺新开张，老板娘热情地送了我一杯豆浆。一年过去了，包子铺还在，老板娘认识我了，每次去都多给我舀一勺辣油。住久了才有这种细碎的人情味。"
+  }
+];
+
+const NOTES = [
+  {
+    date:"2026.10.25", cat:"编程", title:"JavaScript 闭包到底在说什么",
+    excerpt:"闭包不是什么高深的魔法，它只是函数记着自己出生时的环境。",
+    full:"以前一直搞不懂闭包，看了很多文章还是似懂非懂。最近写一个计数器的需求，突然通了：闭包就是一个函数，它被从原来的地方拿出来之后，仍然记得它出生时周围的变量。\n\nfunction counter(){\n  let count = 0;\n  return function(){ return ++count; };\n}\n\n那个返回的函数，外面拿不到 count，但它自己一直记着。这就是闭包。\n\n关键点：闭包让局部变量「活」了下来，但也意味着它不会被回收，用多了会占内存。"
+  },
+  {
+    date:"2026.10.12", cat:"编程", title:"动态规划入门：从爬楼梯说起",
+    excerpt:"DP 的本质是：把大问题拆成小问题，把小问题的答案存起来别重算。",
+    full:"爬楼梯：一次可以走1阶或2阶，走到第n阶有多少种走法？\n\n倒过来想：到第n阶的最后一步，要么是从n-1上来的，要么是从n-2上来的。所以 f(n)=f(n-1)+f(n-2)。\n\n这就是DP。关键两步：\n1. 定义状态——f(i)是什么意思；\n2. 找状态转移——f(i)怎么从前面推出来。\n\n别一上来就递归，递归会把同一件事算很多遍。用一个数组把算过的存下来，就是「动态」规划。"
+  },
+  {
+    date:"2026.09.28", cat:"英语", title:"长难句拆解的三步法",
+    excerpt:"先找谓语动词，再拆从句，最后理修饰关系。",
+    full:"读外刊最怕长难句。最近试了一个方法，挺管用：\n\n第一步，找句子里的谓语动词。一个句子有几个谓语，就意味着它有几个分句。\n第二步，找连词和关系词（who/which/that/that/and/but），把从句从主句里切出来。\n第三步，先读主句的主干（主谓宾），再把从句和修饰语一块一块贴回去。\n\n例：The book that I bought yesterday, which was recommended by my teacher, turned out to be really good.\n\n主句是 The book turned out to be really good。两个从句都是修饰 book 的。这样一拆，句子就短了。"
+  },
+  {
+    date:"2026.09.10", cat:"读书", title:"《人类简史》读书笔记",
+    excerpt:"智人之所以能统治地球，不是因为更强壮，而是因为能讲故事。",
+    full:"赫拉利最核心的观点：人类和其他动物最大的区别，在于我们相信「虚构的故事」——国家、钱、公司、法律，这些东西其实只存在于我们集体的想象里。但正因为大家都信，成千上万的陌生人才能协作。\n\n这解释了为什么早期的神祇、宗教、文字系统如此重要：它们都是「共同想象」的载体。\n\n值得反复想的一句话：「我们并没有驯化小麦，反而是小麦驯化了我们。」——农业革命看似进步，其实把人绑在了土地上，过得比采集狩猎更辛苦。"
+  },
+  {
+    date:"2026.08.20", cat:"技能", title:"手机摄影：光圈、快门和 ISO 的关系",
+    excerpt:"这三者是一个三脚架，动一个就要补偿另外两个。",
+    full:"拍照片本质上是在控制光进 sensor 的量：\n\n- 光圈（Aperture）：镜头开多大。大光圈进光多，背景虚化强；小光圈进光少，前后都清楚。\n- 快门（Shutter）：光进来多久。快门快，凝固动作；快门慢，动的东西会糊。\n- ISO：感光灵敏度。ISO 高，暗环境也能拍，但会出噪点。\n\n这三个互相制约：光圈开大了，快门就要加快，否则过曝；快门加快了，ISO 就得拉高，否则太暗。手机上的「专业模式」调的就是这三样。先从光线好的地方练，习惯了再去拍夜景。"
+  }
+];
+
+const CATS = ["全部","编程","英语","读书","技能"];
+let activeCat = "全部";
+
+// ===== 渲染：首页 =====
+function renderHome(){
+  document.getElementById("home-life").innerHTML =
+    LIFE.slice(0,2).map(e=>entryHTML(e,"life",true)).join("");
+  document.getElementById("home-notes").innerHTML =
+    NOTES.slice(0,2).map(e=>entryHTML(e,"note",true)).join("");
+  bindToggles("home-life"); bindToggles("home-notes");
+}
+
+function entryHTML(e,type,compact){
+  const tag = type==="life"
+    ? `<span class="tag life">生活</span>`
+    : `<span class="tag note">${e.cat}</span>`;
+  return `<div class="entry">
+    <div class="entry-head">
+      <h3>${e.title}</h3>
+      <span class="date">${e.date}</span>
+    </div>
+    <div class="excerpt">${e.excerpt}</div>
+    <div class="tags">${tag}</div>
+    <div class="full">${(e.full||"").replace(/\n/g,"<br>")}</div>
+    <span class="toggle">展开
+      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3l3 3 3-3" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </span>
+  </div>`;
+}
+
+// ===== 渲染：生活时间线 =====
+function renderLife(){
+  document.getElementById("life-list").innerHTML = LIFE.map(e=>`
+    <div class="tl-item">
+      <div class="tl-date">${e.date}</div>
+      <div class="tl-card" onclick="this.classList.toggle('open')">
+        <h3>${e.title}</h3>
+        <p>${e.excerpt}</p>
+        <div class="full">${e.full.replace(/\n/g,"<br>")}</div>
+      </div>
+    </div>`).join("");
+}
+
+// ===== 渲染：笔记 =====
+function renderFilters(){
+  document.getElementById("note-filters").innerHTML = CATS.map(c=>
+    `<button class="${c===activeCat?"active":""}" onclick="setCat('${c}')">${c}</button>`
+  ).join("");
+}
+function setCat(c){ activeCat=c; renderFilters(); renderNotes(); }
+function renderNotes(){
+  const list = activeCat==="全部" ? NOTES : NOTES.filter(n=>n.cat===activeCat);
+  document.getElementById("note-list").innerHTML = list.length
+    ? list.map(e=>entryHTML(e,"note",false)).join("")
+    : `<p style="color:var(--text-2);font-size:14px;padding:20px 0">这个分类下暂时还没有笔记。</p>`;
+  bindToggles("note-list");
+}
+
+function bindToggles(id){
+  document.querySelectorAll("#"+id+" .entry").forEach(el=>{
+    el.addEventListener("click",()=>el.classList.toggle("open"));
+  });
+}
+
+// ===== 路由 =====
+function route(){
+  const hash = location.hash.replace("#/","") || "home";
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  const el = document.getElementById("view-"+hash);
+  if(el) el.classList.add("active");
+  document.querySelectorAll("nav a").forEach(a=>{
+    a.classList.toggle("active", a.dataset.route===hash);
+  });
+  window.scrollTo({top:0,behavior:"instant"});
+}
+window.addEventListener("hashchange",route);
+
+// ===== 初始化 =====
+renderHome();
+renderLife();
+renderFilters();
+renderNotes();
+route();
+</script>
+</body>
+</html>
